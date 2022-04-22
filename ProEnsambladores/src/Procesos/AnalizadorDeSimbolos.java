@@ -47,7 +47,7 @@ public class AnalizadorDeSimbolos {
     }
 
     public void identificador(Vector<String> vectorConTodosLosElementos, JTextArea cuadro){
-        int band, band2, band3, band4, band5;
+        int band, band2, band3, band4, band5, band6, band7, band8, band9, band10;
         /*for (int j = 0; j<vectorConTodosLosElementos.size(); j += 1){
             cuadro.insert(vectorConTodosLosElementos.get(j)+"\n", cuadro.getText().length());
         }*/
@@ -58,6 +58,11 @@ public class AnalizadorDeSimbolos {
             band3 = 0;
             band4 = 0;
             band5 = 0;
+            band6 = 0;
+            band7 = 0;
+            band8 = 0;
+            band9 = 0;
+            band10 = 0;
             //Identificador de Pseudoinstrucciones compuestas
             for(int k = 0; k<vectorCompuestasP.length; k += 1){
                 if(vectorConTodosLosElementos.get(j).equals(vectorCompuestasP[k])){
@@ -118,12 +123,41 @@ public class AnalizadorDeSimbolos {
             }
             //Identificador de constantes tipo caracter
             //Identificador de Simbolos
+            if(band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0){
+                try{int auxNumTemp = Integer.parseInt(vectorConTodosLosElementos.get(j).charAt(0)+"");band6 += 1;
+                }catch(Exception exs){
+                    String temp = "";
+                    int k = 0;
+                    if(vectorConTodosLosElementos.get(j).charAt(0) > 64 && vectorConTodosLosElementos.get(j).charAt(0) < 91){
+                        if(vectorConTodosLosElementos.get(j).length() <11){
+                            /*while(vectorConTodosLosElementos.get(j).charAt(k) != ',' && k<vectorConTodosLosElementos.get(j).length()){
+                                System.out.println(vectorConTodosLosElementos.get(j).length());
+                                System.out.println(vectorConTodosLosElementos.get(j).charAt(k));
+
+                                k += 1;
+                            } */   
+
+                            for(k = 0; k < vectorConTodosLosElementos.get(j).length(); k += 1){
+                                temp += vectorConTodosLosElementos.get(j).charAt(k);
+                            }
+                            System.out.println("LLego");
+                            todoIdentificado.add(temp);
+                            todoIdentificado.add(vectorResultados[3]);
+                            band6 = 0;
+                        }else{
+                            band6 += 1;
+                        }
+                    }else{
+                        band6 += 1;
+                    }
+                }
+            }
             
             //Identificador de
             //No identificado
             
             Boolean condi;
-            condi = vectorConTodosLosElementos.get(j).equals("") == false && band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0;
+            condi = vectorConTodosLosElementos.get(j).equals("") == false && band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0 && band6 > 0;
             if(condi){
                 todoIdentificado.add(vectorConTodosLosElementos.get(j));
                 todoIdentificado.add(vectorResultados[8]);
