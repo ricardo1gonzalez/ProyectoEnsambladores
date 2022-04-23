@@ -48,6 +48,7 @@ public class AnalizadorDeSimbolos {
 
     public void identificador(Vector<String> vectorConTodosLosElementos, JTextArea cuadro){
         int band, band2, band3, band4, band5, band6, band7, band8, band9, band10;
+        Boolean condi,condiT;
         /*for (int j = 0; j<vectorConTodosLosElementos.size(); j += 1){
             cuadro.insert(vectorConTodosLosElementos.get(j)+"\n", cuadro.getText().length());
         }*/
@@ -107,8 +108,6 @@ public class AnalizadorDeSimbolos {
                     band4 += 1;
                 }
             }
-            //Identificador de constantes numericas Hexadecimales
-            //Identificador de constantes numericas Binarias
             //Identificador de constantes numericas decimales
             for(int k = 0; k<vectorInstrucciones.length; k += 1){
                 try{
@@ -121,26 +120,90 @@ public class AnalizadorDeSimbolos {
                     band5 = 1;
                 }
             }
+            //Identificador de constantes numericas Hexadecimales
+            String temp = "";
+            try{
+                int a = Integer.parseInt(vectorConTodosLosElementos.get(j).charAt(0)+"");
+                a = vectorConTodosLosElementos.get(j).length();
+                if(vectorConTodosLosElementos.get(j).charAt(a-1) == 'H'){
+                    todoIdentificado.add(vectorConTodosLosElementos.get(j));
+                    todoIdentificado.add(vectorResultados[5]);
+                    band8 = 0;
+                }
+            }catch(Exception h){
+                band8 = 1;
+            }
+            //Identificador de constantes numericas Binarias
+            temp = "";
+            try{
+                int a = Integer.parseInt(vectorConTodosLosElementos.get(j).charAt(0)+"");
+                a = vectorConTodosLosElementos.get(j).length();
+                if(vectorConTodosLosElementos.get(j).charAt(a-1) == 'B'){
+                    todoIdentificado.add(vectorConTodosLosElementos.get(j));
+                    todoIdentificado.add(vectorResultados[5]);
+                    band9 = 0;
+                }
+            }catch(Exception h){
+                band9 = 1;
+            }
+            //Identificador de
             //Identificador de constantes tipo caracter
+            condiT = band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0 && band8 > 0 && band9 > 0;
+            if(condiT){                
+                temp = "";
+                int bandComa = 0;
+                int tempCont = 0;
+                char aux = ' ';
+                int opc = 0;
+                if(vectorConTodosLosElementos.get(j).charAt(0) == 39 || vectorConTodosLosElementos.get(j).charAt(0) == 34){
+                    if(vectorConTodosLosElementos.get(j).charAt(0) == 39){
+                        opc = 1;
+                    }
+                    while(bandComa < 2){
+                        for(int k = 0; k < vectorConTodosLosElementos.get(j).length(); k += 1){
+                            if(vectorConTodosLosElementos.get(j).charAt(k) != 39  && vectorConTodosLosElementos.get(j).charAt(k) != 34){                                
+                                temp += vectorConTodosLosElementos.get(j).charAt(k);  
+                            }else{
+                                temp += vectorConTodosLosElementos.get(j).charAt(k);
+                                bandComa +=1 ;
+                            }                       
+                        }
+                        if(bandComa < 2){
+                            j += 1;
+                            temp += " ";
+                            tempCont += 1;
+                            if(tempCont == 3){
+                                if(opc == 1){
+                                    aux = (char) 39;
+                                    temp += aux;
+                                    bandComa = 2;
+                                }else{
+                                    aux = (char) 34;
+                                    temp += aux;
+                                    bandComa = 2;
+                                }
+                            }
+                        }
+                    }
+                    todoIdentificado.add(temp);
+                    todoIdentificado.add(vectorResultados[7]);
+                    band7 = 0;
+                }else{
+                    band7 += 1;
+                }
+            }   
+            condiT = band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0 && band7 > 0;
             //Identificador de Simbolos
-            if(band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0){
+            if(condiT){
                 try{int auxNumTemp = Integer.parseInt(vectorConTodosLosElementos.get(j).charAt(0)+"");band6 += 1;
                 }catch(Exception exs){
-                    String temp = "";
+                    temp = "";
                     int k = 0;
                     if(vectorConTodosLosElementos.get(j).charAt(0) > 64 && vectorConTodosLosElementos.get(j).charAt(0) < 91){
                         if(vectorConTodosLosElementos.get(j).length() <11){
-                            /*while(vectorConTodosLosElementos.get(j).charAt(k) != ',' && k<vectorConTodosLosElementos.get(j).length()){
-                                System.out.println(vectorConTodosLosElementos.get(j).length());
-                                System.out.println(vectorConTodosLosElementos.get(j).charAt(k));
-
-                                k += 1;
-                            } */   
-
                             for(k = 0; k < vectorConTodosLosElementos.get(j).length(); k += 1){
                                 temp += vectorConTodosLosElementos.get(j).charAt(k);
                             }
-                            System.out.println("LLego");
                             todoIdentificado.add(temp);
                             todoIdentificado.add(vectorResultados[3]);
                             band6 = 0;
@@ -151,13 +214,9 @@ public class AnalizadorDeSimbolos {
                         band6 += 1;
                     }
                 }
-            }
-            
-            //Identificador de
+            }            
             //No identificado
-            
-            Boolean condi;
-            condi = vectorConTodosLosElementos.get(j).equals("") == false && band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0 && band6 > 0;
+            condi = vectorConTodosLosElementos.get(j).equals("") == false && condiT && band6 > 0;            
             if(condi){
                 todoIdentificado.add(vectorConTodosLosElementos.get(j));
                 todoIdentificado.add(vectorResultados[8]);
