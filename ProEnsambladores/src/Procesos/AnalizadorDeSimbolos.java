@@ -289,6 +289,54 @@ public class AnalizadorDeSimbolos {
         }
     }
     
+    public void AjustaCorchetes2(Vector<String> vectorConTodosLosElementos, Vector<String> vectorSalida){         
+        String temp;       
+        for(int j = 0; j < vectorConTodosLosElementos.size(); j += 1){
+            vectorSalida.add(vectorConTodosLosElementos.get(j));
+            String parts[] = vectorConTodosLosElementos.get(j).split("\\+");
+            try{
+                if(vectorConTodosLosElementos.get(j).endsWith("]") && vectorConTodosLosElementos.get(j).charAt(0) == '['){
+                    for(int k = 0; k < parts.length; k += 1){
+                        System.out.println(parts[k]);
+                        temp = "";
+                        for(int m=0;m<parts[k].length();m++){
+                            if(parts[k].charAt(m) != '[' && parts[k].charAt(m) != ']'){
+                                temp += parts[k].charAt(m);
+                            }
+                        }
+                        
+                        vectorSalida.add(temp);
+                    }
+                }
+            }catch(Exception ex){
+                vectorSalida.add(vectorConTodosLosElementos.get(j));
+            }            
+        }
+    }
+    
+    public void AjustaCorchetes3(Vector<String> vectorConTodosLosElementos, Vector<String> vectorSalida){  
+        String temp;
+        for(int j = 0; j < vectorConTodosLosElementos.size(); j += 1){
+            vectorSalida.add(vectorConTodosLosElementos.get(j));
+            String parts[] = vectorConTodosLosElementos.get(j).split("\\:");
+            try{
+                if(vectorConTodosLosElementos.get(j).endsWith("]") && vectorConTodosLosElementos.get(j).charAt(0) == '['){
+                    for(int k = 0; k < parts.length; k += 1){
+                        temp = "";
+                        for(int m=0;m<parts[k].length();m++){
+                            if(parts[k].charAt(m) != '[' && parts[k].charAt(m) != ']'){
+                                temp += parts[k].charAt(m);
+                            }
+                        }
+                        vectorSalida.add(temp);
+                    }
+                }
+            }catch(Exception ex){
+                vectorSalida.add(vectorConTodosLosElementos.get(j));
+            }            
+        }
+    }
+    
     public void AjustaDUP(Vector<String> vectorConTodosLosElementos, Vector<String> vectorSalida){
         String dup;
         String temp;
@@ -361,7 +409,7 @@ public class AnalizadorDeSimbolos {
     }
 
     public void identificador(Vector<String> vectorConTodosLosElementos, JTextArea cuadro){
-        int band, band2, band3, band4, band5, band6, band7, band8, band9, band10;
+        int band, band2, band3, band4, band5, band6, band7, band8, band9, band10, band11;
         Boolean condi,condiT;
         Vector<String> aux;
 
@@ -428,11 +476,26 @@ public class AnalizadorDeSimbolos {
                 }catch(Exception es){
                     band10 = 1;
                 }
+            }else{
+                band10 = 1;
+            }
+            //Identificador de []
+            condiT = band > 0 && band2 > 0 && band3 > 0 && band4 > 0 && band5 > 0 && band7 > 0 && band8 > 0 && band9 > 0 && band6 > 0 && band10 > 0;
+            if(condiT){
+                if(vectorConTodosLosElementos.get(j).endsWith("]") && vectorConTodosLosElementos.get(j).charAt(0) == '['){
+                    todoIdentificado.add(vectorConTodosLosElementos.get(j));
+                    todoIdentificado.add("Estructura");
+                    band11 = 0;
+                }else{
+                    band11 = 1;
+                }
+            }else{
+                band11 = 1;
             }
             //System.out.println(band+","+band2+","+band3+","+band4+","+band5+","+band6+","+band7+","+band8+","+band9+","+band10);
             //System.out.println(vectorConTodosLosElementos.get(j));
             //No identificado
-            condi = vectorConTodosLosElementos.get(j).equals("") == false && condiT  && band10 > 0;            
+            condi = vectorConTodosLosElementos.get(j).equals("") == false && condiT  && band11 > 0;            
             if(condi){
                 todoIdentificado.add(vectorConTodosLosElementos.get(j));
                 todoIdentificado.add(vectorResultados[8]);

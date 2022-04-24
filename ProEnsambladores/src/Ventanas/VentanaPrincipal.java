@@ -203,8 +203,10 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                 analiza.AjustaCorchetes(aux, aux2);
                 aux = new Vector<String>();               
                 analiza.AjustaDUP(aux2, todo);
-                analiza.ver(todo, txaAnalisis);
-                analiza.identificador(todo, txaAnalisis);
+                aux2 = new Vector<String>();
+                analiza.AjustaCorchetes2(todo, aux);
+                todo = new Vector<String>(); 
+                analiza.identificador(aux, txaAnalisis);
             }catch (Exception er){
                 JOptionPane.showMessageDialog(this, "Ruta inválida", "Error", JOptionPane.ERROR_MESSAGE);
             }
