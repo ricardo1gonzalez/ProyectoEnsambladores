@@ -168,8 +168,11 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                 txaAnalisis.setText("");
                 String a = new String();
                 String b = new String();
+                
                 Vector<String> todo = new Vector<String>();
-
+                Vector<String> aux = new Vector<String>();
+                Vector<String> aux2 = new Vector<String>();
+                
                 AnalizadorDeSimbolos analiza = new AnalizadorDeSimbolos();
                 //En esta parte del código se obtiene el código y se transforma a caracteres manejables
                 while (scn.hasNextLine()) {
@@ -185,7 +188,7 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                                 parts[j] = parts[j].replace(" ","");
                                 parts[j] = parts[j].replace("\t","");
                                 parts[j] = parts[j].replace(" ","");
-                                if(parts[j].toUpperCase().equals(".CODE") || parts[j].toUpperCase().equals(".DATA") || parts[j].toUpperCase().equals(".STACK")){
+                                if(parts[j].toUpperCase().equals(".CODE") || parts[j].toUpperCase().equals(".DATA") || parts[j].toUpperCase().equals(".STACK") || parts[j].toUpperCase().equals("BYTE") || parts[j].toUpperCase().equals("WORD")){
                                     todo.add(parts[j].toUpperCase()+" "+parts[j+1].toUpperCase());
                                     j += 1;
                                 }else{
@@ -195,6 +198,12 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                         }
                     }
                 }
+                analiza.AjustaComas(todo, aux);
+                todo = new Vector<String>();
+                analiza.AjustaCorchetes(aux, aux2);
+                aux = new Vector<String>();               
+                analiza.AjustaDUP(aux2, todo);
+                analiza.ver(todo, txaAnalisis);
                 analiza.identificador(todo, txaAnalisis);
             }catch (Exception er){
                 JOptionPane.showMessageDialog(this, "Ruta inválida", "Error", JOptionPane.ERROR_MESSAGE);
