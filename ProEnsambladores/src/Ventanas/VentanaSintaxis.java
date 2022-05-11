@@ -21,7 +21,7 @@ import javax.swing.table.*;
  * @author yosoy
  */
 public class VentanaSintaxis extends JFrame{
-    public String[] columnTabla1 = {"Número","Símbolo", "Tipo", "Tamaño"};
+    public String[] columnTabla1 = {"Número","Símbolo", "Tipo", "Tamaño","Valor"};
     public String[] columnTabla2 = {"Número","Intrucción", "Sintáxis", "Detalles"};
     public DefaultTableModel dtm = new DefaultTableModel(null, columnTabla1);
     public JTable table = new JTable(dtm);

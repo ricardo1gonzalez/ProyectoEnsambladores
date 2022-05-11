@@ -564,78 +564,73 @@ public class AnalizadorDeSimbolos {
         return aux;
     }
     
-    public void iniTS(DefaultTableModel m, Vector<String> vecto, int [] limi){
-        for(int i = 0; i < (limi[1] - limi[0]); i += 1){
-            Object[] datos = {(i+1)+"","---","---","---"};
+    public void iniTS(DefaultTableModel m, int limi){
+        for(int i = 0; i < limi; i += 1){
+            Object[] datos = {(i+1)+"","---","---","---","---"};
             m.addRow(datos);
         }        
     }
     
-    public void recti(DefaultTableModel m, String a, int limi){        
+    public void recti(DefaultTableModel m, String a, int lim){        
         String[] p = a.split(" ");
+        //Nombre
         for(int i = 0; i < p.length; i += 1){
-            if(p[i].equals("") == false){
-               m.setValueAt(p[i], limi, 2);
-               m.setValueAt("Variable", limi, 4);
+            if(p[i].matches("\\s*[A-Z]+[A-Z0-9]{0,9}.*")){
+               m.setValueAt(p[i], lim, 1);
+               m.setValueAt("Variable", lim, 2);
                i = p.length;
             }
         }
+        //
         for(int i = 0; i < p.length; i += 1){
             if(p[i].matches("\\s*DB\\s*")){
-               m.setValueAt("8 bits", limi, 3); 
+               m.setValueAt("DB", lim, 3); 
                i = p.length;
             }else if(p[i].matches("\\s*DW\\s*")){
-               m.setValueAt("16 bits", limi, 3);
+               m.setValueAt("DW", lim, 3);
                i = p.length;
             }else if(p[i].matches("\\s*EQU\\s*")){
-               m.setValueAt("16 bits", limi, 3);
-               m.setValueAt("Constante", limi, 4);
+               m.setValueAt("DW", lim, 3);
+               m.setValueAt("Constante", i, 2);
                i = p.length;
             }
         }
         for(int i = 0; i < p.length; i += 1){
             if(p[i].matches("\\s*^\".+\"*\\s*")){
-               m.setValueAt(p[i], limi, 4); 
+               m.setValueAt(p[i], lim, 4); 
                i = p.length;
             }else if(p[i].matches("\\s*^\'.+\\s*")){
-               System.out.println(p[i]); 
+               m.setValueAt(p[i], lim, 4);  
                i = p.length;
             }else if(p[i].matches("\\s*0*[A-F0-9]+H\\s*")){
-               System.out.println(p[i]+" Constante tipo numerico hexadecimal"); 
+               m.setValueAt(p[i], lim, 4);  
                i = p.length;
             }else if(p[i].matches("\\s*0*[01]+B\\s*")){
-               System.out.println(p[i]+" Constante tipo numerico binario"); 
+               m.setValueAt(p[i], lim, 4);  
                i = p.length;
             }
         }
     }
     
-    public void CreaTablaDeSimbolos(DefaultTableModel m, Vector<String> vecto, int [] limi){
+    public void CreaTablaDeSimbolos(DefaultTableModel m, DefaultTableModel m2, Vector<String> vecto){
         int numInstru = 0;
         int band = 0, band2 = 0, band3 = 0;
         for(int i = 0; i < vecto.size(); i += 1){
             if(vecto.get(i).matches("\\s*\\.DATA\\s+SEGMENT\\s*")){
-                m.setValueAt("Sintáxis correcta", i, 2);
-                m.setValueAt("La definición es correcta", i, 3);
+                //m.setValueAt("Sintáxis correcta", i, 2);
+                //m.setValueAt("La definición es correcta", i, 3);
                 band = i;
                 band3 = 1;
             }else if(vecto.get(i).matches("\\s*ENDS\\s*")&& band3 > 0){
-                m.setValueAt("Sintáxis correcta", i, 2);
-                m.setValueAt("La definición es correcta", i, 3);
+                //m.setValueAt("Sintáxis correcta", i, 2);
+                //m.setValueAt("La definición es correcta", i, 3);
                 band2 = i;
                 i = vecto.size();
             }
         } 
-        for(int i = band; i < band2; i++){
-            if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+D[B|W]{1}\\s+[0*[A-F0-9]+H|B*]+\\s*")){
-                m.setValueAt("Sintáxis Correcta", i, 2);
-                m.setValueAt("La definición es correcta", i, 3);
-                band = i;
-            }else{
-                m.setValueAt("Sintáxis Incorrecta", i, 2);
-                m.setValueAt("La definición no coincide con las especificaciones", i, 3);
-                band = i;
-            }
+        //iniTS(m2, band2 - band);
+        for(int i = band+1; i < band2; i++){
+            recti(m2, vecto.get(i), i);
         }
     }
     
@@ -692,11 +687,11 @@ public class AnalizadorDeSimbolos {
             }
         } 
         for(int i = band+1; i < band2; i++){
-            if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+D[B|W]{1}\\s+[0*[A-F0-9]+H|B*]+\\s*")){
+            if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]{1,9}\\s+D[B|W]{1}\\s+[0*[A-F0-9]+H|B*]+\\s*")){
                 m.setValueAt("Sintáxis Correcta", i, 2);
                 m.setValueAt("La definición es correcta", i, 3);
                 band = i;
-            }else if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+EQU\\s+[0*[A-F0-9]+H|B*]+\\s*")){
+            }else if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]{1,9}\\s+EQU\\s+[0*[A-F0-9]+H|B*]+\\s*")){
                 m.setValueAt("Sintáxis Correcta", i, 2);
                 m.setValueAt("La definición es correcta", i, 3);
                 band = i;
@@ -762,7 +757,31 @@ public class AnalizadorDeSimbolos {
                 m.setValueAt("Sintáxis Correcta", i, 2);
                 m.setValueAt("La definición es correcta", i, 3);
                 band = i;
-            }else if(vecto.get(i).matches("\\s*.:+\\s*")){
+            }else if(vecto.get(i).matches("\\s*.*:\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*JBE\\s*[A-Z]+[A-Z0-9]*\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*JNGE\\s*[A-Z]+[A-Z0-9]*\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*JNA\\s*[A-Z]+[A-Z0-9]*\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*JS\\s*[A-Z]+[A-Z0-9]*\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*JL\\s*[A-Z]+[A-Z0-9]*\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*JNZ\\s*[A-Z]+[A-Z0-9]*\\s*")){
                 m.setValueAt("Sintáxis Correcta", i, 2);
                 m.setValueAt("La definición es correcta", i, 3);
                 band = i;

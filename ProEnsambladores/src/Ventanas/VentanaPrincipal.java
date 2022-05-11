@@ -311,7 +311,9 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                 //Imprime la tabla de simbolos
                 //int ve[] = analiza.SegmentoD(todo2);
                 //analiza.iniTS(ventana2.dtm, todo2, ve);
-                //analiza.CreaTablaDeSimbolos(ventana2.dtm, todo2, ve);
+                //int lim = analiza.limit(todo);
+                analiza.iniTS(ventana2.dtm, todo.size());
+                analiza.CreaTablaDeSimbolos(ventana2.dtm2,ventana2.dtm, todo);
                 //Impreme las instrucciones a la tabla
                 analiza.preparaInstu(todo, aux2, ventana2.dtm2);                        
                 analiza.AnalizadorDeDatos(ventana2.dtm2, todo);
