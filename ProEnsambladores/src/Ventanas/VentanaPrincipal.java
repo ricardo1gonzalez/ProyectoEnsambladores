@@ -12,11 +12,14 @@ import java.util.Scanner;
 import java.util.Vector;
 
 import Procesos.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VentanaPrincipal extends JFrame implements ActionListener {
     private JLabel lblFondo;
     private JButton btnArchivo;
     private JButton btnAnalizar;
+    private JButton btnSintaxis;
     private JTextField txtRuta;
     private JTextArea txaCodigo;
     private JTextArea txaAnalisis;
@@ -24,6 +27,32 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
     private JScrollPane scroll2;
     private JPanel panel;
     private JPanel panel2;
+
+    public JTextField getTxtRuta() {
+        return txtRuta;
+    }
+
+    public void setTxtRuta(JTextField txtRuta) {
+        this.txtRuta = txtRuta;
+    }
+
+    public JTextArea getTxaCodigo() {
+        return txaCodigo;
+    }
+
+    public void setTxaCodigo(JTextArea txaCodigo) {
+        this.txaCodigo = txaCodigo;
+    }
+
+    public JTextArea getTxaAnalisis() {
+        return txaAnalisis;
+    }
+
+    public void setTxaAnalisis(JTextArea txaAnalisis) {
+        this.txaAnalisis = txaAnalisis;
+    }
+    
+    
 
     public  VentanaPrincipal() throws IOException {
         int xArea = 400;
@@ -53,18 +82,25 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
         //Inicializamos e instanciamos los botones
         btnArchivo = new JButton(new ImageIcon(buttonIcon));
         btnAnalizar = new JButton("Analizar");
+        btnSintaxis = new JButton("Sintáxis");
 
         //Propiedades de los botones
         btnArchivo.setBorderPainted(false);
         btnArchivo.setFocusPainted(false);
         btnArchivo.setContentAreaFilled(false);
         btnArchivo.setBounds(10,10,50,50);
-
+        
         btnAnalizar.setBorderPainted(true);
         btnAnalizar.setFocusPainted(true);
         btnAnalizar.setContentAreaFilled(false);
         btnAnalizar.setForeground(Color.BLUE);
         btnAnalizar.setBounds(570,10,80,30);
+        
+        btnSintaxis.setBorderPainted(true);
+        btnSintaxis.setFocusPainted(true);
+        btnSintaxis.setContentAreaFilled(false);
+        btnSintaxis.setForeground(Color.GREEN);
+        btnSintaxis.setBounds(660,10,80,30);
 
         //Inicializamos los cuadros de texto
         txtRuta = new JTextField("c://");
@@ -91,6 +127,7 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
         //Agregamos los componentes en la ventana
         this.add(btnArchivo);
         this.add(btnAnalizar);
+        this.add(btnSintaxis);
         this.add(txtRuta);
         panel.add( scroll, BorderLayout.CENTER );
         panel2.add(scroll2, BorderLayout.CENTER);
@@ -100,6 +137,7 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
         //Relacionamos el boton con su evento
         btnArchivo.addActionListener(this);
         btnAnalizar.addActionListener(this);
+        btnSintaxis.addActionListener(this);
     }
 
     public void crearTabla(){
@@ -198,6 +236,7 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                         }
                     }
                 }
+                //analiza.imprimirSystem(todo);
                 analiza.AjustaComas(todo, aux);
                 todo = new Vector<String>();
                 analiza.AjustaCorchetes(aux, aux2);
@@ -209,6 +248,80 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                 analiza.identificador(aux, txaAnalisis);
             }catch (Exception er){
                 JOptionPane.showMessageDialog(this, "Ruta inválida", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }else if(e.getSource() == btnSintaxis){
+            try{
+                String direc = new String(txtRuta.getText());
+                Scanner scn = null;
+                Vector<String> todo = new Vector<String>();
+                Vector<String> todo2 = new Vector<String>();
+                File archi = new File(direc);
+                try {
+                    scn = new Scanner(archi);
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+                
+                VentanaSintaxis ventana2 = new VentanaSintaxis();
+                //Limpiar isntrucciones
+                String a = new String();
+                String b = new String();
+                
+                Vector<String> aux = new Vector<String>();
+                Vector<String> aux2 = new Vector<String>();
+                
+                AnalizadorDeSimbolos analiza = new AnalizadorDeSimbolos();
+                //En esta parte del código se obtiene el código y se transforma a caracteres manejables
+                while (scn.hasNextLine()) {
+                    a = scn.nextLine();
+                    if(a.equals("\n") == false){
+                        //System.out.println(a);
+                        b = analiza.adaptar(a);
+                        todo.add(b.toUpperCase());
+                        /*String[] parts = b.split(" ");
+                        for(int j = 0; j<parts.length; j += 1){
+                            //System.out.println(parts[j]+",");
+                            if(!" ".equals(parts[j]) && !"\n".equals(parts[j]) && !"".equals(parts[j]) && !"\t".equals(parts[j])){
+                                //System.out.println(parts[j].toUpperCase());
+                                parts[j] = parts[j].replace(" ","");
+                                parts[j] = parts[j].replace("\t","");
+                                parts[j] = parts[j].replace(" ","");
+                                if(parts[j].toUpperCase().equals(".CODE") || parts[j].toUpperCase().equals(".DATA") || parts[j].toUpperCase().equals(".STACK") || parts[j].toUpperCase().equals("BYTE") || parts[j].toUpperCase().equals("WORD")){
+                                    todo.add(parts[j].toUpperCase()+" "+parts[j+1].toUpperCase());
+                                    j += 1;
+                                }else{
+                                    todo.add(parts[j].toUpperCase());
+                                }
+                            }
+                        }*/
+                    }
+                }
+                
+                //analiza.imprimirSystem(todo);
+               /* analiza.AjustaComas(todo, aux);
+                todo = new Vector<String>();
+                analiza.AjustaCorchetes(aux, aux2);
+                aux = new Vector<String>();               
+                analiza.AjustaDUP(aux2, todo);
+                aux2 = new Vector<String>();
+                analiza.AjustaCorchetes2(todo, aux);
+                //todo = aux; 
+                todo = analiza.identificador(aux, txaAnalisis);*/
+                //analiza.imprimirSystem(todo2);
+                //Imprime la tabla de simbolos
+                //int ve[] = analiza.SegmentoD(todo2);
+                //analiza.iniTS(ventana2.dtm, todo2, ve);
+                //analiza.CreaTablaDeSimbolos(ventana2.dtm, todo2, ve);
+                //Impreme las instrucciones a la tabla
+                analiza.preparaInstu(todo, aux2, ventana2.dtm2);                        
+                analiza.AnalizadorDeDatos(ventana2.dtm2, todo);
+                analiza.AnalizadorDePila(ventana2.dtm2, todo);
+                analiza.AnalizadorDeCodigo(ventana2.dtm2, todo);
+                
+                ventana2.setVisible(true);
+            }catch(Exception ea){
+                JOptionPane.showMessageDialog(this, "Error inesperado", "Error", JOptionPane.ERROR_MESSAGE);
+                Logger.getLogger(VentanaSintaxis.class.getName()).log(Level.SEVERE, null, ea);
             }
         }
     }

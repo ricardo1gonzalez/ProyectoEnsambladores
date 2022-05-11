@@ -1,7 +1,16 @@
 package Procesos;
 
+import Ventanas.VentanaPrincipal;
+import Ventanas.VentanaSintaxis;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Scanner;
 import javax.swing.*;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
 
 public class AnalizadorDeSimbolos {
     public String[] vectorRegistros = {"AX","AH","AL","BX","BH","BL","CX","CH","CL","DX","DH","DL","SI","DI","SS","DS","ES","CS","BP","SP","IP"};
@@ -9,6 +18,7 @@ public class AnalizadorDeSimbolos {
     public String[] vectorCompuestasP = {".CODE SEGMENT",".DATA SEGMENT",".STACK SEGMENT","ENDS","DB","DW","EQU","DUP","BYTE PTR","WORD PTR"};
     public String[] vectorInstrucciones = {"IMUL","INC","INT","POP","SAR","ADC","ADD","SUB","JBE","JNGE","JNA","JS","JL","JNZ"};
     public String[] vectorCompuestasS = {"BYTE PTR","WORD PTR"};
+    public String[] vectorReservadas = {".CODE SEGMENT",".DATA SEGMENT",".STACK SEGMENT","ENDS"};
     public String[] vectorResultados = {"Pseudoinstrucción","Instrucción","Registro","Símbolo","Constante numérica decimal","Constante numérica hexadecimal","Constante numérica binaria","Constante tipo caracter","Elemento no identificado"};
     public Vector<String> todoIdentificado = new Vector<String>();
     public int j;
@@ -261,6 +271,13 @@ public class AnalizadorDeSimbolos {
         cuadro.insert("\n----------------------------------------------------------------------\n", cuadro.getText().length());
     }
     
+    public void imprimirSystem(Vector<String> vectorConTodosLosElementos){
+        for (int j = 0; j<vectorConTodosLosElementos.size(); j += 1){
+            System.out.println(vectorConTodosLosElementos.get(j)+"\n");
+        }
+        System.out.println("\n----------------------------------------------------------------------\n");
+    }
+    
     public void AjustaComas(Vector<String> vectorConTodosLosElementos, Vector<String> vectorSalida){
         for(int j = 0; j < vectorConTodosLosElementos.size(); j += 1){
             String parts[] = vectorConTodosLosElementos.get(j).split(",");
@@ -297,7 +314,7 @@ public class AnalizadorDeSimbolos {
             try{
                 if(vectorConTodosLosElementos.get(j).endsWith("]") && vectorConTodosLosElementos.get(j).charAt(0) == '['){
                     for(int k = 0; k < parts.length; k += 1){
-                        System.out.println(parts[k]);
+                        //System.out.println(parts[k]);
                         temp = "";
                         for(int m=0;m<parts[k].length();m++){
                             if(parts[k].charAt(m) != '[' && parts[k].charAt(m) != ']'){
@@ -408,7 +425,7 @@ public class AnalizadorDeSimbolos {
         return tipo;
     }
 
-    public void identificador(Vector<String> vectorConTodosLosElementos, JTextArea cuadro){
+    public Vector<String> identificador(Vector<String> vectorConTodosLosElementos, JTextArea cuadro){
         int band, band2, band3, band4, band5, band6, band7, band8, band9, band10, band11;
         Boolean condi,condiT;
         Vector<String> aux;
@@ -505,6 +522,287 @@ public class AnalizadorDeSimbolos {
         for (int j = 0; j<todoIdentificado.size()-1; j += 2){
             cuadro.insert(todoIdentificado.get(j)+"---------> "+todoIdentificado.get(j+1)+"\n", cuadro.getText().length());
         }
-
+        return todoIdentificado;
+    }
+    
+    public void llnaSimple(DefaultTableModel tabla, Vector<String> vecto){
+        try {
+            VentanaPrincipal venDat = new VentanaPrincipal();
+            String direc = new String(venDat.getTxtRuta().getText());
+            Scanner scn = null;
+            System.out.println(direc);
+            File archi = new File(direc);
+            try {
+                scn = new Scanner(archi);
+            } catch (FileNotFoundException ex) {
+                ex.printStackTrace();
+            }
+            String a = new String();
+            String b = new String();
+            while (scn.hasNextLine()) {
+                a = scn.nextLine();
+                System.out.println(a);
+                //vecto.add(a.toUpperCase());
+                Object[] newRow = {a,"---","----"};
+                tabla.addRow(newRow);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(VentanaSintaxis.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public int[] SegmentoD(Vector<String> vecto){
+        int aux[] = {0,0};
+        for(int i = 0; i < vecto.size(); i += 1){
+            if(vecto.get(i).toUpperCase().equals(".DATA SEGMENT")){
+                aux[0] = i;
+            }else if(vecto.get(i).toUpperCase().equals("ENDS")){
+                aux[1] = i;
+                i = vecto.size();
+            }
+        }
+        return aux;
+    }
+    
+    public void iniTS(DefaultTableModel m, Vector<String> vecto, int [] limi){
+        for(int i = 0; i < (limi[1] - limi[0]); i += 1){
+            Object[] datos = {(i+1)+"","---","---","---"};
+            m.addRow(datos);
+        }        
+    }
+    
+    public void recti(DefaultTableModel m, String a, int limi){        
+        String[] p = a.split(" ");
+        for(int i = 0; i < p.length; i += 1){
+            if(p[i].equals("") == false){
+               m.setValueAt(p[i], limi, 2);
+               m.setValueAt("Variable", limi, 4);
+               i = p.length;
+            }
+        }
+        for(int i = 0; i < p.length; i += 1){
+            if(p[i].matches("\\s*DB\\s*")){
+               m.setValueAt("8 bits", limi, 3); 
+               i = p.length;
+            }else if(p[i].matches("\\s*DW\\s*")){
+               m.setValueAt("16 bits", limi, 3);
+               i = p.length;
+            }else if(p[i].matches("\\s*EQU\\s*")){
+               m.setValueAt("16 bits", limi, 3);
+               m.setValueAt("Constante", limi, 4);
+               i = p.length;
+            }
+        }
+        for(int i = 0; i < p.length; i += 1){
+            if(p[i].matches("\\s*^\".+\"*\\s*")){
+               m.setValueAt(p[i], limi, 4); 
+               i = p.length;
+            }else if(p[i].matches("\\s*^\'.+\\s*")){
+               System.out.println(p[i]); 
+               i = p.length;
+            }else if(p[i].matches("\\s*0*[A-F0-9]+H\\s*")){
+               System.out.println(p[i]+" Constante tipo numerico hexadecimal"); 
+               i = p.length;
+            }else if(p[i].matches("\\s*0*[01]+B\\s*")){
+               System.out.println(p[i]+" Constante tipo numerico binario"); 
+               i = p.length;
+            }
+        }
+    }
+    
+    public void CreaTablaDeSimbolos(DefaultTableModel m, Vector<String> vecto, int [] limi){
+        int numInstru = 0;
+        int band = 0, band2 = 0, band3 = 0;
+        for(int i = 0; i < vecto.size(); i += 1){
+            if(vecto.get(i).matches("\\s*\\.DATA\\s+SEGMENT\\s*")){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+                band3 = 1;
+            }else if(vecto.get(i).matches("\\s*ENDS\\s*")&& band3 > 0){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band2 = i;
+                i = vecto.size();
+            }
+        } 
+        for(int i = band; i < band2; i++){
+            if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+D[B|W]{1}\\s+[0*[A-F0-9]+H|B*]+\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else{
+                m.setValueAt("Sintáxis Incorrecta", i, 2);
+                m.setValueAt("La definición no coincide con las especificaciones", i, 3);
+                band = i;
+            }
+        }
+    }
+    
+    public void AnalizadorDePila(DefaultTableModel m, Vector<String> vecto){
+        int band = 0, band2 = 0, band3 = 0, band4 = 0, band5 = 0;
+        for(int i = 0; i < vecto.size(); i += 1){
+            if(vecto.get(i).matches("\\s*\\.STACK\\s+SEGMENT\\s*")){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+                band3 = 1;
+            }else if(vecto.get(i).matches("\\s*ENDS\\s*") && band3 > 0){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band2 = i;
+                i = vecto.size();
+            }
+        }
+        for(int i = band+1; i < band2; i++){
+            if(vecto.get(i).matches("\\s*DW\\s+[0*[A-F0-9]+H|B*]+\\s+DUP\\([0*[A-F0-9]+H|B*]+\\)\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else{
+                m.setValueAt("Sintáxis Incorrecta", i, 2);
+                m.setValueAt("La definición no coincide con las especificaciones", i, 3);
+                band = i;
+            }
+        }
+    }
+    /*  .data segment (pseudoinstrucción que identifica el inicio de la definición del segmento de datos)
+        símbolo db constante caracter
+        símbolo db constante numérica byte con/sin signo
+        símbolo db constante numérica palabra sin signo dup (constante caracter byte)
+        símbolo db constante numérica palabra sin signo dup (constante numérica byte con/sin signo)
+        símbolo dw constante numérica palabra con/sin signo
+        símbolo dw constante numérica palabra sin signo dup(constante numérica palabra con/sin signo)
+        símbolo equ constante numérica palabra con/sin signo
+        ends (pseudoinstrucción que identifica el fin de la definición de un segmento)*/
+    public void AnalizadorDeDatos(DefaultTableModel m, Vector<String> vecto){
+        int numInstru = 0;
+        int band = 0, band2 = 0, band3 = 0;
+        for(int i = 0; i < vecto.size(); i += 1){
+            if(vecto.get(i).matches("\\s*\\.DATA\\s+SEGMENT\\s*")){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+                band3 = 1;
+            }else if(vecto.get(i).matches("\\s*ENDS\\s*")&& band3 > 0){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band2 = i;
+                i = vecto.size();
+            }
+        } 
+        for(int i = band+1; i < band2; i++){
+            if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+D[B|W]{1}\\s+[0*[A-F0-9]+H|B*]+\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+EQU\\s+[0*[A-F0-9]+H|B*]+\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+D[B|W]{1}\\s+\".*\"\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*[A-Z]{1}[A-Z0-9]*\\s+D[B|W]{1}\\s+\'.*\'\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else{
+                m.setValueAt("Sintáxis Incorrecta", i, 2);
+                m.setValueAt("La definición no coincide con las especificaciones", i, 3);
+                band = i;
+            }
+        }
+    }
+    
+    public void AnalizadorDeCodigo(DefaultTableModel m, Vector<String> vecto){
+        int band = 0, band2 = 0, band3 = 0, band4 = 0, band5 = 0;
+        for(int i = 0; i < vecto.size(); i += 1){
+            //System.out.println(vecto.get(i)+" es "+vecto.get(i).toUpperCase().equals(".CODE SEGMENT"));
+            if(vecto.get(i).matches("\\s*\\.CODE\\sSEGMENT\\s*")){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+                band3 = 1;
+            }else if(vecto.get(i).matches("\\s*ENDS\\s*") && band3 > 0){
+                m.setValueAt("Sintáxis correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band2 = i;
+                i = vecto.size();
+            }
+        }
+        //System.out.println(vecto.size());
+        for(int i = band+1; i < band2; i++){
+            if(vecto.get(i).matches("^SCASW|^SCASW[\\s]*|\\s*SCASW|\\s*SCASW\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("^HLT|^HLT[\\s]*|\\s*HLT|\\s*HLT\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("^XLATB|^XLATB[\\s]*|\\s*XLATB|\\s*XLATB\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("^INTO|^INTO[\\s]*|\\s*INTO|\\s*INTO\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("^AAD|^AAD[\\s]*|\\s*AAD|\\s*AAD\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("^MOVSW|^MOVSW[\\s]*|\\s*MOVSW|\\s*MOVSW\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*IMUL\\s+[A-Z][0-9]+\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else if(vecto.get(i).matches("\\s*.:+\\s*")){
+                m.setValueAt("Sintáxis Correcta", i, 2);
+                m.setValueAt("La definición es correcta", i, 3);
+                band = i;
+            }else{
+                m.setValueAt("Sintáxis Incorrecta", i, 2);
+                m.setValueAt("La definición no coincide con las especificaciones", i, 3);
+                band = i;
+            }
+        }
+    }
+    
+    public void preparaInstu(Vector<String> vecto, Vector<String> vecto2, DefaultTableModel m){
+        String aux = "";
+        for(int i = 0; i < vecto.size(); i += 1){
+            for(int j = 0; j < vectorInstruccionesC.length;j += 1){
+                //System.out.println(vectorInstruccionesC[j]+" con "+vecto.get(i)+" es "+vecto.get(i).equals(vectorInstruccionesC[j]));
+                if(vecto.get(i).equals(vectorInstruccionesC[j])){
+                    if(vecto.get(i).equals(vectorInstruccionesC[j])){
+                        
+                    }
+                }
+            }
+            /*for(int j = 0; j < vectorInstrucciones.length;j += 1){
+                //System.out.println(vectorInstruccionesC[j]+" con "+vecto.get(i)+" es "+vecto.get(i).equals(vectorInstruccionesC[j]));
+                if(vecto.get(i).equals(vectorInstrucciones[j])){
+                    if(vecto.get(i).equals(vectorInstruccionesC[j])){
+                        
+                    }
+                }
+            }
+            for(int j = 0; j < vectorReservadas.length;j += 1){
+                //System.out.println(vectorInstruccionesC[j]+" con "+vecto.get(i)+" es "+vecto.get(i).equals(vectorInstruccionesC[j]));
+                if(vecto.get(i).equals(vectorReservadas[j])){
+                    if(vecto.get(i).equals(vectorInstruccionesC[j])){
+                        
+                    }
+                }
+            }*/
+            Object[] datos = {(i+1)+"",vecto.get(i),"---","---"};
+            m.addRow(datos);
+        }  
     }
 }
