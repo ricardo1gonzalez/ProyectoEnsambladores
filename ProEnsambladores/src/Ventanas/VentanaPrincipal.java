@@ -99,7 +99,7 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
         btnSintaxis.setBorderPainted(true);
         btnSintaxis.setFocusPainted(true);
         btnSintaxis.setContentAreaFilled(false);
-        btnSintaxis.setForeground(Color.GREEN);
+        btnSintaxis.setForeground(Color.BLUE);
         btnSintaxis.setBounds(660,10,80,30);
 
         //Inicializamos los cuadros de texto
@@ -236,7 +236,6 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                         }
                     }
                 }
-                //analiza.imprimirSystem(todo);
                 analiza.AjustaComas(todo, aux);
                 todo = new Vector<String>();
                 analiza.AjustaCorchetes(aux, aux2);
@@ -278,48 +277,19 @@ public class VentanaPrincipal extends JFrame implements ActionListener {
                         //System.out.println(a);
                         b = analiza.adaptar(a);
                         todo.add(b.toUpperCase());
-                        /*String[] parts = b.split(" ");
-                        for(int j = 0; j<parts.length; j += 1){
-                            //System.out.println(parts[j]+",");
-                            if(!" ".equals(parts[j]) && !"\n".equals(parts[j]) && !"".equals(parts[j]) && !"\t".equals(parts[j])){
-                                //System.out.println(parts[j].toUpperCase());
-                                parts[j] = parts[j].replace(" ","");
-                                parts[j] = parts[j].replace("\t","");
-                                parts[j] = parts[j].replace(" ","");
-                                if(parts[j].toUpperCase().equals(".CODE") || parts[j].toUpperCase().equals(".DATA") || parts[j].toUpperCase().equals(".STACK") || parts[j].toUpperCase().equals("BYTE") || parts[j].toUpperCase().equals("WORD")){
-                                    todo.add(parts[j].toUpperCase()+" "+parts[j+1].toUpperCase());
-                                    j += 1;
-                                }else{
-                                    todo.add(parts[j].toUpperCase());
-                                }
-                            }
-                        }*/
                     }
                 }
-                
-                //analiza.imprimirSystem(todo);
-               /* analiza.AjustaComas(todo, aux);
-                todo = new Vector<String>();
-                analiza.AjustaCorchetes(aux, aux2);
-                aux = new Vector<String>();               
-                analiza.AjustaDUP(aux2, todo);
-                aux2 = new Vector<String>();
-                analiza.AjustaCorchetes2(todo, aux);
-                //todo = aux; 
-                todo = analiza.identificador(aux, txaAnalisis);*/
-                //analiza.imprimirSystem(todo2);
-                //Imprime la tabla de simbolos
-                //int ve[] = analiza.SegmentoD(todo2);
-                //analiza.iniTS(ventana2.dtm, todo2, ve);
-                //int lim = analiza.limit(todo);
                 analiza.iniTS(ventana2.dtm, todo.size());
                 analiza.CreaTablaDeSimbolos(ventana2.dtm2,ventana2.dtm, todo);
+                analiza.corrijeTable(ventana2.dtm);
+                analiza.corrijeTable(ventana2.dtm2);
+                analiza.AgregaEtiq(ventana2.dtm, todo);
                 //Impreme las instrucciones a la tabla
                 analiza.preparaInstu(todo, aux2, ventana2.dtm2);                        
-                analiza.AnalizadorDeDatos(ventana2.dtm2, todo);
-                analiza.AnalizadorDePila(ventana2.dtm2, todo);
-                analiza.AnalizadorDeCodigo(ventana2.dtm2, todo);
-                
+                analiza.Pila(ventana2.dtm2, todo);
+                analiza.Datos(ventana2.dtm2, todo);
+                analiza.Codigo(ventana2.dtm2, ventana2.dtm, todo);
+                analiza.iniTS2(ventana2.dtm2, todo.size());
                 ventana2.setVisible(true);
             }catch(Exception ea){
                 JOptionPane.showMessageDialog(this, "Error inesperado", "Error", JOptionPane.ERROR_MESSAGE);
